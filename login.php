@@ -1,33 +1,46 @@
 <?php
-// Establece la conexión con tu base de datos
-$servername = "localhost"; // Cambia localhost por tu servidor de base de datos
-$username = "u569309670_lars_"; // Cambia usuario por tu nombre de usuario de la base de datos
-$password = "Senk1419__"; // Cambia contraseña por tu contraseña de la base de datos
-$dbname = "u569309670_lars"; // Cambia nombre_bd por el nombre de tu base de datos
+session_start();
 
-// Crea la conexión
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Verifica la conexión
-if ($conn->connect_error) {
-  die("Conexión fallida: " . $conn->connect_error);
-}
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "lars";
 
 // Recibe los datos del formulario
 $email = $_POST['email'];
-$password = $_POST['password'];
+$password_input = $_POST['password'];
 
-// Consulta para verificar las credenciales
-$sql = "SELECT * FROM usuarios WHERE email = '$email' AND password = '$password'";
-$result = $conn->query($sql);
+try {
+    // Conecta a la base de datos
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-if ($result->num_rows > 0) {
-  // Usuario autenticado correctamente
-  echo "¡Inicio de sesión exitoso!";
-} else {
-  // Error de autenticación
-  echo "Usuario o contraseña incorrectos.";
+    // Consulta preparada para obtener el usuario por email
+    $stmt = $conn->prepare("SELECT * FROM usuarios WHERE email = :email");
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
+
+    // Verifica si se encontró algún usuario
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user) {
+        // Verifica la contraseña usando password_verify
+        if (password_verify($password_input, $user['password'])) {
+            // Guarda la información en la sesión
+            $_SESSION['email'] = $email;
+            // Redirige al dashboard
+            header("Location: dashboard.php");
+            exit; // Asegúrate de salir después de redirigir
+        } else {
+            echo "Contraseña incorrecta.";
+        }
+    } else {
+        echo "No se encontró ningún usuario con el correo electrónico: " . $email;
+    }
+
+} catch(PDOException $e) {
+    echo "Error: " . $e->getMessage();
 }
 
-$conn->close();
+// Cierra la conexión
+$conn = null;
 ?>
