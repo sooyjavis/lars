@@ -1,0 +1,14 @@
+<?php
+
+// Creando una nueva conexión a la base de datos.
+$conn = new mysqli("localhost", "root", "", "lars");
+
+// Comprobando si hay un error de conexión.
+if ($conn->connect_error) {
+    echo 'Error de conexion ' . $conn->connect_error;
+    exit;
+}
+
+// Aquí puedes continuar ejecutando consultas u operaciones en la base de datos utilizando $conn.
+
+?>
