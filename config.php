@@ -9,6 +9,5 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Aquí puedes continuar ejecutando consultas u operaciones en la base de datos utilizando $conn.
 
 ?>
